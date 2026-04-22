@@ -1,0 +1,175 @@
+<div class="min-h-screen bg-white">
+  <!-- Progress Bar Top -->
+  <div class="fixed top-0 left-0 w-full h-1.5 bg-surface-2 z-50">
+    <div class="h-full bg-primary transition-all duration-500 ease-out" [style.width]="progressWidth()"></div>
+  </div>
+
+  <div class="pt-8 px-6 pb-24 max-w-lg mx-auto">
+    <!-- Step Header -->
+    @if (currentStep() <= 3) {
+      <div class="mb-8">
+        <span class="text-xs font-bold text-primary uppercase tracking-widest">Paso {{currentStep()}} de 3</span>
+        <h2 class="text-2xl mt-1">
+          @if (currentStep() === 1) { ¿Cuál es tu objetivo? }
+          @else if (currentStep() === 2) { Cuéntanos sobre ti }
+          @else if (currentStep() === 3) { Tu rutina actual }
+        </h2>
+      </div>
+    }
+
+    <!-- STEP 1: OBJETIVOS -->
+    @if (currentStep() === 1) {
+      <div class="grid grid-cols-2 gap-4 animate-fade-up">
+        @for (obj of objetivos; track obj) {
+          <div 
+            (click)="selectObjetivo(obj)"
+            [class.border-primary]="form().objetivo === obj"
+            [class.bg-primary-light]="form().objetivo === obj"
+            class="card cursor-pointer border-2 transition-all flex flex-col items-center text-center space-y-2 p-6"
+          >
+            <span class="text-3xl">
+              @if (obj === 'perder_grasa') { 🔥 }
+              @else if (obj === 'ganar_musculo') { 💪 }
+              @else if (obj === 'mantenerse') { ⚖️ }
+              @else if (obj === 'resistencia') { 🏃 }
+            </span>
+            <h3 class="text-sm font-bold capitalize">{{ obj.replace('_', ' ') }}</h3>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- STEP 2: CUERPO -->
+    @if (currentStep() === 2) {
+      <div class="space-y-8 animate-fade-up">
+        <!-- Genero -->
+        <div>
+          <label class="text-xs font-bold text-ink-muted uppercase mb-3 block">Género</label>
+          <div class="flex gap-3">
+            @for (g of generos; track g) {
+              <button 
+                (click)="selectGenero(g)"
+                [class]="form().genero === g ? 'bg-primary text-white border-primary' : 'bg-white text-ink-secondary border-border'"
+                class="flex-1 py-3 rounded-full border-2 font-bold text-sm capitalize transition-all"
+              >
+                {{g}}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Sliders -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-end">
+            <label class="text-xs font-bold text-ink-muted uppercase">Peso</label>
+            <span class="font-mono text-2xl font-bold text-primary">{{form().peso}}<span class="text-sm ml-1 text-ink-muted">KG</span></span>
+          </div>
+          <input type="range" min="40" max="150" [ngModel]="form().peso" (ngModelChange)="updateWeight($event)" class="w-full h-2 bg-surface-2 rounded-lg appearance-none cursor-pointer accent-primary">
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-end">
+            <label class="text-xs font-bold text-ink-muted uppercase">Altura</label>
+            <span class="font-mono text-2xl font-bold text-primary">{{form().altura}}<span class="text-sm ml-1 text-ink-muted">CM</span></span>
+          </div>
+          <input type="range" min="120" max="220" [ngModel]="form().altura" (ngModelChange)="updateHeight($event)" class="w-full h-2 bg-surface-2 rounded-lg appearance-none cursor-pointer accent-primary">
+        </div>
+
+        <div class="space-y-4">
+          <label class="text-xs font-bold text-ink-muted uppercase block">Edad</label>
+          <div class="flex items-center justify-center space-x-6">
+            <button (click)="updateEdad(-1)" class="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center text-2xl font-bold">-</button>
+            <span class="text-4xl font-mono font-bold">{{form().edad}}</span>
+            <button (click)="updateEdad(1)" class="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center text-2xl font-bold">+</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 3: RUTINA -->
+    @if (currentStep() === 3) {
+      <div class="space-y-8 animate-fade-up">
+        <div>
+          <label class="text-xs font-bold text-ink-muted uppercase mb-4 block">Días por semana</label>
+          <div class="flex justify-between">
+            @for (d of diasSemana; track d) {
+              <button 
+                (click)="updateDias(d)"
+                [class]="form().dias_gym === d ? 'bg-primary text-white border-primary' : 'bg-surface-2 text-ink-muted border-transparent'"
+                class="w-10 h-10 rounded-full font-bold flex items-center justify-center transition-all"
+              >
+                {{d}}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-ink-muted uppercase mb-4 block">Nivel de fitness</label>
+          <div class="space-y-3">
+            @for (n of niveles; track n) {
+              <div 
+                (click)="selectNivel(n)"
+                [class.border-primary]="form().nivel === n"
+                [class.bg-primary-light]="form().nivel === n"
+                class="card flex items-center justify-between cursor-pointer border-2 transition-all py-4 px-6"
+              >
+                <div class="capitalize font-bold">{{n}}</div>
+                @if (form().nivel === n) {
+                  <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 4: GENERATING (LOADING) -->
+    @if (currentStep() === 4) {
+      <div class="fixed inset-0 bg-white z-[60] flex flex-col items-center justify-center p-8 text-center">
+        <div class="relative w-48 h-48 mb-12">
+          <!-- Spinner SVG -->
+          <svg class="w-full h-full transform -rotate-90">
+            <circle cx="96" cy="96" r="88" stroke="#EEF1F6" stroke-width="12" fill="none" />
+            <circle cx="96" cy="96" r="88" stroke="#FF6B2C" stroke-width="12" fill="none" 
+              stroke-dasharray="552.92" 
+              [attr.stroke-dashoffset]="552.92 - (552.92 * loadingProgress() / 100)"
+              class="transition-all duration-1000 ease-out" 
+            />
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-5xl animate-pulse">🧠</span>
+          </div>
+        </div>
+        <h2 class="text-2xl font-bold min-h-[3rem]">{{loadingStatus()}}</h2>
+        <p class="text-ink-muted mt-2">Estamos creando el plan perfecto para tus objetivos.</p>
+      </div>
+    }
+
+    <!-- Navigation Buttons -->
+    @if (currentStep() <= 3) {
+      <div class="fixed bottom-0 left-0 w-full p-6 bg-white border-t border-border flex gap-4 max-w-lg mx-auto left-1/2 -translate-x-1/2">
+        @if (currentStep() > 1) {
+          <button 
+            (click)="prevStep()"
+            class="flex-1 py-4 px-6 rounded-2xl border-2 border-border font-bold text-ink-secondary"
+          >
+            Atrás
+          </button>
+        }
+        <button 
+          (click)="nextStep()"
+          class="btn-primary w-full"
+          [class.flex-[2]]="currentStep() > 1"
+        >
+          {{currentStep() === 3 ? 'FINALIZAR' : 'SIGUIENTE'}}
+        </button>
+      </div>
+    }
+  </div>
+</div>
