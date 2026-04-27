@@ -8,89 +8,108 @@ import { FitAgentService } from '../../services/fit-agent.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="px-6 pt-6 space-y-6 pb-24">
-      <!-- Header -->
+    <div class="px-6 pt-8 space-y-8 pb-28 bg-[#F9FAFB] min-h-screen">
+      <!-- Header Premium -->
       <header class="flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-            {{ initials() }}
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <div class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white font-bold shadow-button overflow-hidden">
+              <span class="text-lg relative z-10">{{ initials() }}</span>
+              <div class="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent"></div>
+            </div>
           </div>
           <div>
-            <p class="text-xs font-bold text-ink-muted uppercase tracking-wider">Buenos días</p>
-            <h1 class="text-xl -mt-1">{{ profile()?.nombre || 'Fit User' }}</h1>
+            <p class="text-[10px] font-bold text-ink-muted uppercase tracking-[0.2em]">Resumen Diario</p>
+            <h1 class="text-2xl font-bold text-ink -mt-1">{{ profile()?.nombre || 'Fit User' }}</h1>
           </div>
         </div>
-        <div class="flex items-center space-x-2 bg-surface px-3 py-2 rounded-full border border-border">
+        <div class="flex items-center space-x-2 bg-white px-4 py-2.5 rounded-2xl border border-border shadow-sm">
           <span class="text-lg">🔥</span>
-          <span class="font-mono font-bold text-ink">5</span>
+          <span class="font-bold text-ink text-sm">5 días</span>
         </div>
       </header>
 
-      <!-- Main Banner Card -->
-      <section class="relative overflow-hidden bg-gradient-to-br from-primary to-primary-dark rounded-3xl p-6 text-white shadow-button animate-fade-up">
+      <!-- Banner de Entrenamiento (Elevado) -->
+      <section class="relative overflow-hidden bg-ink rounded-[2.5rem] p-8 text-white shadow-2xl animate-fade-up">
         <div class="relative z-10">
-          <span class="font-mono text-xs font-bold opacity-80 uppercase tracking-widest">Plan de Hoy ({{ todayName() }})</span>
-          <h2 class="text-3xl mt-1 text-white capitalize">{{ routineForToday() }}</h2>
-          <p class="mt-2 text-sm opacity-90">Basado en tu objetivo: {{ profile()?.objetivo?.replace('_', ' ') || 'Mejorar' }}</p>
+          <div class="flex items-center space-x-2 mb-4">
+            <div class="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+            <span class="font-bold text-[10px] opacity-60 uppercase tracking-[0.2em]">Hoy: {{ todayName() }}</span>
+          </div>
+          <h2 class="text-4xl font-bold text-white capitalize leading-tight">{{ routineForToday() }}</h2>
+          <p class="mt-4 text-sm opacity-50 font-medium">Estrategia enfocada en: {{ profile()?.objetivo?.replace('_', ' ') || 'Mejorar' }}</p>
           
-          <button class="mt-6 bg-white text-primary px-6 py-3 rounded-2xl font-bold flex items-center space-x-2 transition-transform active:scale-95 shadow-lg">
-            <span>Ver Rutina en la pestaña</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </button>
+          <div class="mt-8 flex items-center space-x-4">
+            <div class="flex -space-x-2">
+              <div class="w-8 h-8 rounded-full border-2 border-ink bg-primary-light flex items-center justify-center text-[10px] text-primary">🏃</div>
+              <div class="w-8 h-8 rounded-full border-2 border-ink bg-accent-light flex items-center justify-center text-[10px] text-accent">💪</div>
+              <div class="w-8 h-8 rounded-full border-2 border-ink bg-success-light flex items-center justify-center text-[10px] text-success">🥗</div>
+            </div>
+            <span class="text-[10px] font-bold opacity-40 uppercase tracking-widest">+ Plan Activo</span>
+          </div>
         </div>
-        <!-- Decorative Circle -->
-        <div class="absolute -bottom-8 -right-8 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+        
+        <!-- Elemento decorativo circular -->
+        <div class="absolute -top-12 -right-12 w-48 h-48 bg-primary/20 rounded-full blur-[60px]"></div>
+        <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-accent/10 rounded-full blur-[60px]"></div>
       </section>
 
-      <!-- Metrics Grid -->
-      <div class="grid grid-cols-2 gap-4">
-        <!-- Mensaje Motivacional -->
-        <div class="card bg-primary-light border-none p-6 col-span-2 animate-fade-up stagger-0" *ngIf="fitPlan()?.mensaje_motivacional">
-          <p class="text-sm font-medium text-primary italic leading-relaxed">
+      <!-- Grid de Métricas y Recomendaciones -->
+      <div class="grid grid-cols-2 gap-5">
+        
+        <!-- Mensaje de la IA -->
+        <div class="col-span-2 bg-white border border-border rounded-[2rem] p-6 shadow-sm animate-fade-up stagger-0" *ngIf="fitPlan()?.mensaje_motivacional">
+          <div class="flex items-center space-x-3 mb-3">
+            <span class="text-xl">🤖</span>
+            <span class="text-[10px] font-bold text-ink-muted uppercase tracking-widest">FitAgent Coach</span>
+          </div>
+          <p class="text-sm font-medium text-ink-secondary leading-relaxed italic">
             "{{ fitPlan()?.mensaje_motivacional }}"
           </p>
         </div>
 
-        <!-- Advertencias -->
-        <div class="card bg-warning-light border-none p-4 col-span-2 animate-fade-up stagger-1" *ngIf="fitPlan()?.advertencias?.length">
-          <span class="text-[10px] font-bold text-warning uppercase">Advertencias de tu plan</span>
-          <ul class="mt-2 space-y-1">
-            @for (adv of fitPlan()?.advertencias ?? []; track adv) {
-              <li class="text-xs text-ink-secondary leading-relaxed">⚠️ {{ adv }}</li>
-            }
-          </ul>
+        <!-- Métricas Físicas (Sin Nivel) -->
+        <div class="bg-white border border-border rounded-[2rem] p-5 shadow-sm animate-fade-up stagger-1">
+          <div class="w-10 h-10 bg-accent-light rounded-xl flex items-center justify-center text-xl mb-4">⚖️</div>
+          <p class="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">IMC Actual</p>
+          <p class="text-xl font-bold text-ink">{{ fitPlan()?.perfil?.imc || '--' }}</p>
         </div>
 
-        <!-- Perfil calculado -->
-        <div class="card bg-accent-light border-none p-4 col-span-2 animate-fade-up stagger-2">
-          <span class="text-[10px] font-bold text-accent uppercase">Tu perfil</span>
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <div class="text-xs font-bold text-ink flex items-center space-x-1">
-              <span>⚖️</span><span>IMC: {{ fitPlan()?.perfil?.imc }}</span>
-            </div>
-            <div class="text-xs font-bold text-ink flex items-center space-x-1">
-              <span>🎯</span><span class="capitalize">{{ fitPlan()?.perfil?.objetivo }}</span>
-            </div>
-            <div class="text-xs font-bold text-ink flex items-center space-x-1">
-              <span>📊</span><span class="capitalize">{{ fitPlan()?.perfil?.nivel }}</span>
-            </div>
-            <div class="text-xs font-bold text-ink flex items-center space-x-1">
-              <span>📅</span><span>{{ fitPlan()?.perfil?.dias_entrenamiento }} días/semana</span>
-            </div>
+        <div class="bg-white border border-border rounded-[2rem] p-5 shadow-sm animate-fade-up stagger-2">
+          <div class="w-10 h-10 bg-success-light rounded-xl flex items-center justify-center text-xl mb-4">🎯</div>
+          <p class="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">Objetivo</p>
+          <p class="text-sm font-bold text-ink capitalize">{{ fitPlan()?.perfil?.objetivo || '--' }}</p>
+        </div>
+
+        <!-- Recomendaciones Estratégicas -->
+        <div class="col-span-2 bg-primary text-white rounded-[2rem] p-6 shadow-button animate-fade-up stagger-3" *ngIf="fitPlan()?.recomendaciones?.length">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[10px] font-bold opacity-70 uppercase tracking-[0.2em]">Recomendaciones</span>
+            <span class="text-xl">✨</span>
           </div>
-        </div>
-
-        <!-- Recomendaciones -->
-        <div class="card bg-surface border-none p-4 col-span-2 animate-fade-up stagger-3" *ngIf="fitPlan()?.recomendaciones?.length">
-          <span class="text-[10px] font-bold text-ink-muted uppercase">Recomendaciones</span>
-          <ul class="mt-2 space-y-2">
+          <ul class="space-y-4">
             @for (rec of fitPlan()?.recomendaciones ?? []; track rec) {
-              <li class="text-xs text-ink-secondary leading-relaxed">• {{ rec }}</li>
+              <li class="flex items-start space-x-3">
+                <div class="mt-1 w-1.5 h-1.5 bg-white rounded-full shrink-0"></div>
+                <p class="text-xs font-medium leading-relaxed opacity-90">{{ rec }}</p>
+              </li>
             }
           </ul>
         </div>
+
+        <!-- Alertas/Advertencias (Solo si existen) -->
+        <div class="col-span-2 bg-warning-light border border-warning/20 rounded-[2rem] p-5 animate-fade-up" *ngIf="fitPlan()?.advertencias?.length">
+          <div class="flex items-center space-x-2 mb-3">
+            <span class="text-lg">⚠️</span>
+            <span class="text-[10px] font-bold text-warning uppercase tracking-widest">Advertencias Técnicas</span>
+          </div>
+          <ul class="space-y-2">
+            @for (adv of fitPlan()?.advertencias ?? []; track adv) {
+              <li class="text-xs text-ink-secondary font-medium">• {{ adv }}</li>
+            }
+          </ul>
+        </div>
+
       </div>
     </div>
   `

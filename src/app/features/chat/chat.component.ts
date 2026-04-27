@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FitAgentService } from '../../services/fit-agent.service';
@@ -109,7 +109,7 @@ import { ChatMessage } from '../../models/fit-plan.types';
 export class ChatComponent {
   private fitAgentService = inject(FitAgentService);
 
-  historial = signal<ChatMessage[]>([]);
+  historial = this.fitAgentService.historial;
   mensajeActual = '';
   cargando = signal(false);
 
@@ -117,17 +117,14 @@ export class ChatComponent {
     const texto = this.mensajeActual.trim();
     if (!texto || this.cargando()) return;
 
-    this.historial.update(h => [...h, { rol: 'usuario', texto }]);
     this.mensajeActual = '';
     this.cargando.set(true);
 
-    this.fitAgentService.enviarMensajeChat(texto, this.historial()).subscribe({
-      next: (respuesta) => {
-        this.historial.update(h => [...h, { rol: 'agente', texto: respuesta }]);
+    this.fitAgentService.enviarMensajeChat(texto).subscribe({
+      next: () => {
         this.cargando.set(false);
       },
       error: () => {
-        this.historial.update(h => [...h, { rol: 'agente', texto: 'Hubo un error, intenta de nuevo.' }]);
         this.cargando.set(false);
       }
     });
