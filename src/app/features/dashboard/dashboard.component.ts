@@ -68,13 +68,13 @@ import { FitAgentService } from '../../services/fit-agent.service';
         <div class="bg-white border border-border rounded-[2rem] p-5 shadow-sm animate-fade-up stagger-1">
           <div class="w-10 h-10 bg-accent-light rounded-xl flex items-center justify-center text-xl mb-4">⚖️</div>
           <p class="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">IMC Actual</p>
-          <p class="text-xl font-bold text-ink">{{ fitPlan()?.perfil?.imc || '--' }}</p>
+          <p class="text-xl font-bold text-ink">{{ imc() }}</p>
         </div>
 
         <div class="bg-white border border-border rounded-[2rem] p-5 shadow-sm animate-fade-up stagger-2">
           <div class="w-10 h-10 bg-success-light rounded-xl flex items-center justify-center text-xl mb-4">🎯</div>
           <p class="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">Objetivo</p>
-          <p class="text-sm font-bold text-ink capitalize">{{ fitPlan()?.perfil?.objetivo || '--' }}</p>
+          <p class="text-sm font-bold text-ink capitalize">{{ profile()?.objetivo?.replace('_', ' ') || '--' }}</p>
         </div>
 
         <!-- Recomendaciones Estratégicas -->
@@ -120,6 +120,13 @@ export class DashboardComponent implements OnInit {
   initials = computed(() => {
     const name = this.profile()?.nombre || 'Fit User';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  });
+
+  imc = computed(() => {
+    const p = this.profile();
+    if (!p || !p.peso || !p.altura) return '--';
+    const alturaM = p.altura / 100;
+    return (p.peso / (alturaM * alturaM)).toFixed(1);
   });
 
   todayName = computed(() => {
