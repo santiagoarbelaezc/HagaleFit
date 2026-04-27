@@ -25,18 +25,28 @@ import { ProfileService } from '../../core/services/profile.service';
 
       <!-- Key Metrics -->
       <div class="grid grid-cols-2 gap-4">
-        <div class="card bg-white border-none p-5 shadow-sm">
-          <p class="text-[9px] font-bold text-ink-muted uppercase tracking-widest">IMC Actual</p>
-          <div class="flex items-baseline space-x-1 mt-1">
-            <p class="text-2xl font-mono font-bold">{{ imc() }}</p>
-          </div>
-          <span class="text-[9px] text-success font-bold bg-success/10 px-2 py-0.5 rounded-full mt-2 inline-block">SALUDABLE</span>
+        <div class="card bg-white border border-border rounded-[2rem] p-6 shadow-sm animate-fade-up">
+          <div class="w-10 h-10 bg-accent-light rounded-xl flex items-center justify-center text-xl mb-4">⚖️</div>
+          <p class="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">IMC Calculado</p>
+          <p class="text-2xl font-bold text-ink">{{ imc() }}</p>
+          <span class="text-[9px] text-accent font-bold bg-accent-light px-2 py-0.5 rounded-full mt-3 inline-block">MÉTRICA ACTUAL</span>
         </div>
         
-        <div class="card bg-white border-none p-5 shadow-sm">
-          <p class="text-[9px] font-bold text-ink-muted uppercase tracking-widest">Nivel</p>
-          <p class="text-2xl font-bold mt-1 uppercase">{{ profile()?.nivel || 'N/A' }}</p>
-          <span class="text-[9px] text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full mt-2 inline-block">PROGRAMA ACTIVO</span>
+        <div class="card bg-white border border-border rounded-[2rem] p-6 shadow-sm animate-fade-up">
+          <div class="w-10 h-10 bg-success-light rounded-xl flex items-center justify-center text-xl mb-4">📏</div>
+          <p class="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">Estatura</p>
+          <p class="text-2xl font-bold text-ink">{{ profile()?.altura }}<span class="text-sm font-medium ml-1">cm</span></p>
+          <span class="text-[9px] text-success font-bold bg-success-light px-2 py-0.5 rounded-full mt-3 inline-block">SINCRONIZADO</span>
+        </div>
+
+        <div class="card bg-white border border-border rounded-[2rem] p-6 shadow-sm col-span-2 animate-fade-up">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">Peso Registrado</p>
+              <p class="text-3xl font-bold text-ink">{{ profile()?.peso }}<span class="text-lg font-medium ml-1">kg</span></p>
+            </div>
+            <div class="w-14 h-14 bg-primary-light rounded-2xl flex items-center justify-center text-2xl">🏋️</div>
+          </div>
         </div>
       </div>
 

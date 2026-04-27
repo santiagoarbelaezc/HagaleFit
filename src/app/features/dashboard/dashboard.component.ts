@@ -23,10 +23,6 @@ import { FitAgentService } from '../../services/fit-agent.service';
             <h1 class="text-2xl font-bold text-ink -mt-1">{{ profile()?.nombre || 'Fit User' }}</h1>
           </div>
         </div>
-        <div class="flex items-center space-x-2 bg-white px-4 py-2.5 rounded-2xl border border-border shadow-sm">
-          <span class="text-lg">🔥</span>
-          <span class="font-bold text-ink text-sm">5 días</span>
-        </div>
       </header>
 
       <!-- Banner de Entrenamiento (Elevado) -->
