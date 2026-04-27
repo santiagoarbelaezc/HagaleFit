@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProfileService, UserProfile } from '../../core/services/profile.service';
-
+import { FitAgentService } from '../../services/fit-agent.service';
+import { FitPlanRequest } from '../../models/fit-plan.types';
 @Component({
   selector: 'app-setup',
   standalone: true,
@@ -12,10 +13,11 @@ import { ProfileService, UserProfile } from '../../core/services/profile.service
 })
 export class SetupComponent {
   private profileService = inject(ProfileService);
+  private fitAgentService = inject(FitAgentService);
   private router = inject(Router);
 
   currentStep = signal(1);
-  totalSteps = 4;
+  totalSteps = 3;
 
   progressWidth = computed(() => {
     return (this.currentStep() / this.totalSteps) * 100 + '%';
@@ -25,7 +27,7 @@ export class SetupComponent {
   objetivos: UserProfile['objetivo'][] = ['perder_grasa', 'ganar_musculo', 'mantenerse', 'resistencia'];
   generos: UserProfile['genero'][] = ['masculino', 'femenino', 'otro'];
   niveles: UserProfile['nivel'][] = ['principiante', 'intermedio', 'avanzado'];
-  diasSemana = [1, 2, 3, 4, 5, 6, 7];
+  diasSemanaNombres = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
   // Form State
   form = signal<UserProfile>({
@@ -48,7 +50,7 @@ export class SetupComponent {
 
   nextStep() {
     if (this.currentStep() < this.totalSteps) {
-      if (this.currentStep() === 3) {
+      if (this.currentStep() === 2) {
         this.startGeneration();
       }
       this.currentStep.update(s => s + 1);
@@ -63,6 +65,10 @@ export class SetupComponent {
 
   selectObjetivo(obj: UserProfile['objetivo']) {
     this.form.update(f => ({ ...f, objetivo: obj }));
+  }
+
+  updateNombre(name: string) {
+    this.form.update(f => ({ ...f, nombre: name }));
   }
 
   selectNivel(n: UserProfile['nivel']) {
@@ -87,35 +93,67 @@ export class SetupComponent {
     this.form.update(f => ({ ...f, altura: num }));
   }
 
-  updateDias(d: number) {
-    this.form.update(f => ({ ...f, dias_gym: d }));
+  updateDiasGym(val: any) {
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    this.form.update(f => ({ ...f, dias_gym: num }));
+  }
+
+
+  updateRestricciones(val: string) {
+    this.form.update(f => ({ ...f, restricciones: val }));
+  }
+
+  updatePreferencias(val: string) {
+    this.form.update(f => ({ ...f, preferencias: val }));
   }
 
   private startGeneration() {
     this.isGenerating.set(true);
     const statuses = [
       "Analizando tu perfil...",
-      "Calculando tus calorías...",
+      "Conectando con la IA...",
       "Diseñando tu rutina...",
       "Optimizando tu nutrición...",
-      "¡Listo! Tu plan está preparado 🎉"
+      "Casi listo..."
     ];
 
     let count = 0;
     const interval = setInterval(() => {
       if (count < statuses.length - 1) {
         this.loadingStatus.set(statuses[count]);
-        this.loadingProgress.update(p => p + 25);
+        this.loadingProgress.update(p => p + 20);
         count++;
-      } else {
-        this.loadingStatus.set(statuses[count]);
-        this.loadingProgress.set(100);
+      }
+    }, 1500);
+
+    const f = this.form();
+    const request: FitPlanRequest = {
+      objetivo: f.objetivo === 'perder_grasa' ? 'perder grasa' : 
+                f.objetivo === 'ganar_musculo' ? 'ganar músculo' : 
+                f.objetivo === 'mantenerse' ? 'mantenerse' : 'mejorar resistencia',
+      peso: f.peso,
+      altura: f.altura,
+      edad: f.edad,
+      genero: f.genero
+    };
+
+    this.fitAgentService.generarPlan(request).subscribe({
+      next: (res) => {
         clearInterval(interval);
+        this.loadingProgress.set(100);
+        this.loadingStatus.set("¡Listo! Tu plan está preparado 🎉");
+        this.fitAgentService.setLatestResponse(res);
+        this.profileService.setProfile(f);
         setTimeout(() => {
-          this.profileService.setProfile(this.form());
           this.router.navigate(['/dashboard']);
         }, 1500);
+      },
+      error: (err) => {
+        clearInterval(interval);
+        this.loadingStatus.set("Hubo un error de conexión.");
+        setTimeout(() => this.isGenerating.set(false), 2000);
+        console.error(err);
       }
-    }, 1000);
+    });
   }
 }
