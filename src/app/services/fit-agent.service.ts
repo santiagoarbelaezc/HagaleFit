@@ -4,10 +4,10 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { FitPlanRequest, FitPlanResponse, ChatMessage } from '../models/fit-plan.types';
 import { ProfileService } from '../core/services/profile.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class FitAgentService {
-  private readonly API_URL = '/webhook/e8b39dca-25cb-4cd4-8166-5b25ca0aa543';
 
   // State to hold the latest response so dashboard can read it without fetching again
   private latestResponseSource = new BehaviorSubject<FitPlanResponse | null>(null);
@@ -20,10 +20,10 @@ export class FitAgentService {
 
   generarPlan(datos: FitPlanRequest): Observable<FitPlanResponse> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    console.log('🚀 Enviando datos a n8n:', datos);
+    console.log('🚀 [Agente Plan] Enviando datos a n8n:', datos);
     
-    return this.http.post<FitPlanResponse>(this.API_URL, datos, { headers }).pipe(
-      tap((response: FitPlanResponse) => console.log('✅ Respuesta original de n8n recibida:', response))
+    return this.http.post<FitPlanResponse>(environment.planWebhookUrl, datos, { headers }).pipe(
+      tap((response: FitPlanResponse) => console.log('✅ [Agente Plan] Respuesta recibida:', response))
     );
   }
 
@@ -36,31 +36,51 @@ export class FitAgentService {
   }
 
   private resumirPlan(plan: FitPlanResponse): string {
-    const sesiones = plan.rutina
-      .map(d => `${d.nombre_sesion}: ${d.ejercicios.map(e => e.ejercicio).join(', ')}`)
-      .join(' | ');
+    const p = plan.perfil;
+    // Prioridad absoluta al objetivo
+    let resumen = `OBJETIVO CRÍTICO: ${p.objetivo.toUpperCase()}\n`;
+    resumen += `IMC ACTUAL: ${p.imc}\n\n`;
 
-    return `
-Perfil: ${plan.perfil.nivel}, IMC ${plan.perfil.imc}, objetivo ${plan.perfil.objetivo}, ${plan.perfil.dias_entrenamiento} días/semana.
-Advertencias: ${plan.advertencias.length > 0 ? plan.advertencias.join(' | ') : 'ninguna'}.
-Rutina: ${sesiones}.
-Recomendaciones: ${plan.recomendaciones.join(' | ')}.
-    `.trim();
+    resumen += `[ESTRATEGIA DE ENTRENAMIENTO]\n`;
+    plan.rutina.forEach(dia => {
+      const ejercicios = dia.ejercicios.map(e => e.ejercicio).join(', ');
+      resumen += `DÍA ${dia.dia_numero} (${dia.nombre_sesion}): ${ejercicios}\n`;
+    });
+
+    if (plan.advertencias && plan.advertencias.length > 0) {
+      resumen += `\n[LIMITACIONES]\n- ${plan.advertencias.join('\n- ')}\n`;
+    }
+
+    if (plan.recomendaciones && plan.recomendaciones.length > 0) {
+      resumen += `\n[REGLAS DE ÉXITO PARA ${p.objetivo.toUpperCase()}]\n- ${plan.recomendaciones.join('\n- ')}`;
+    }
+
+    return resumen;
   }
 
   enviarMensajeChat(mensaje: string, historial: ChatMessage[]): Observable<string> {
     const plan = this.getLatestResponse();
     const profile = this.profileService.profile();
     const body = {
+      sessionId: profile?.nombre || 'usuario-anonimo',
       nombre_usuario: profile?.nombre || 'Usuario',
       mensaje,
-      historial: historial.map(m => ({ rol: m.rol, texto: m.texto })),
+      historial: historial.map(m => ({ 
+        role: m.rol === 'usuario' ? 'user' : 'assistant', 
+        content: m.texto 
+      })),
       contexto_plan: plan ? this.resumirPlan(plan) : 'Sin plan generado aún.'
     };
+
+    console.log('🚀 [Agente Chat] Enviando mensaje a n8n:', body);
+
     return this.http.post<{ output: string }>(
-      '/webhook/d0a6902f-c441-4a39-acda-750ad4236f43',
+      environment.chatWebhookUrl,
       body,
       { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }
-    ).pipe(map(res => res.output));
+    ).pipe(
+      tap(res => console.log('✅ [Agente Chat] Respuesta recibida:', res)),
+      map(res => res.output)
+    );
   }
 }

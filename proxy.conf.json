@@ -4,5 +4,11 @@
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug"
+  },
+  "/webhook-test": {
+    "target": "https://santiarco.app.n8n.cloud",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }
