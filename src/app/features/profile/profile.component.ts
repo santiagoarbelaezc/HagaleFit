@@ -2,7 +2,7 @@ import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProfileService } from '../../core/services/profile.service';
-
+//hola
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -93,7 +93,7 @@ import { ProfileService } from '../../core/services/profile.service';
 export class ProfileComponent {
   private profileService = inject(ProfileService);
   private router = inject(Router);
-  
+
   profile = this.profileService.profile;
 
   initials = computed(() => {
