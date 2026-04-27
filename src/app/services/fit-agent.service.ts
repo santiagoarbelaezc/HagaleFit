@@ -7,7 +7,7 @@ import { ProfileService } from '../core/services/profile.service';
 
 @Injectable({ providedIn: 'root' })
 export class FitAgentService {
-  private readonly API_URL = 'https://santiarco.app.n8n.cloud/webhook/e8b39dca-25cb-4cd4-8166-5b25ca0aa543';
+  private readonly API_URL = '/webhook/e8b39dca-25cb-4cd4-8166-5b25ca0aa543';
 
   // State to hold the latest response so dashboard can read it without fetching again
   private latestResponseSource = new BehaviorSubject<FitPlanResponse | null>(null);
@@ -58,7 +58,7 @@ Recomendaciones: ${plan.recomendaciones.join(' | ')}.
       contexto_plan: plan ? this.resumirPlan(plan) : 'Sin plan generado aún.'
     };
     return this.http.post<{ output: string }>(
-      'https://santiarco.app.n8n.cloud/webhook/d0a6902f-c441-4a39-acda-750ad4236f43',
+      '/webhook/d0a6902f-c441-4a39-acda-750ad4236f43',
       body,
       { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }
     ).pipe(map(res => res.output));
