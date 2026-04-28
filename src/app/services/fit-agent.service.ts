@@ -22,11 +22,11 @@ export class FitAgentService {
 
   generarPlan(datos: FitPlanRequest): Observable<FitPlanResponse> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    console.log('🚀 [Agente Plan] Enviando datos a n8n:', datos);
+    console.log('🚀 [FitAgent Back] Generando plan:', datos);
     
     return this.http.post<FitPlanResponse>(environment.planWebhookUrl, datos, { headers }).pipe(
       tap((response: FitPlanResponse) => {
-        console.log('✅ [Agente Plan] Respuesta recibida:', response);
+        console.log('✅ [FitAgent Back] Plan recibido:', response);
         if (response) {
           this.setLatestResponse(response);
         }
@@ -42,75 +42,40 @@ export class FitAgentService {
     return this.latestResponseSource.getValue();
   }
 
-  private resumirPlan(plan: FitPlanResponse): string {
-    const p = plan.perfil;
-    const profile = this.profileService.profile();
-    
-    let resumen = `DATOS DEL USUARIO:\n`;
-    resumen += `Nombre: ${profile?.nombre || 'Santiago'}\n`;
-    resumen += `Peso: ${profile?.peso} kg\n`;
-    resumen += `Altura: ${profile?.altura} cm\n`;
-    resumen += `IMC: ${p.imc}\n`;
-    resumen += `Objetivo: ${p.objetivo.toUpperCase()}\n\n`;
-
-    resumen += `RUTINA ACTUAL:\n`;
-    plan.rutina?.forEach(dia => {
-      const ejercicios = dia.ejercicios.map(e => e.ejercicio).join(', ');
-      resumen += `- ${dia.nombre_sesion}: ${ejercicios}\n`;
-    });
-
-    if (plan.advertencias && plan.advertencias.length > 0) {
-      resumen += `\n[LIMITACIONES]\n- ${plan.advertencias.join('\n- ')}\n`;
-    }
-
-    if (plan.recomendaciones && plan.recomendaciones.length > 0) {
-      resumen += `\n[REGLAS DE ÉXITO PARA ${p.objetivo.toUpperCase()}]\n- ${plan.recomendaciones.join('\n- ')}`;
-    }
-
-    return resumen;
-  }
-
   enviarMensajeChat(mensaje: string): Observable<string> {
     const plan = this.getLatestResponse();
     const profile = this.profileService.profile();
     
     this.agregarMensaje('usuario', mensaje);
 
-    const guiaEstrategica = this.knowledgeService.obtenerGuiaEstrategica(mensaje);
-    const contextoConGuia = (plan ? this.resumirPlan(plan) : 'Sin plan generado aún.') + guiaEstrategica;
-
+    // Mapear al formato esperado por el backend NestJS (ChatDto)
     const body = {
-      sessionId: profile?.nombre || 'usuario-anonimo',
-      nombre_usuario: profile?.nombre || 'Usuario',
-      mensaje,
-      // Enviamos el perfil estructurado para que n8n lo procese con un nodo Code
-      perfil_usuario: {
-        nombre: profile?.nombre,
+      message: mensaje,
+      userContext: {
         peso: profile?.peso,
         altura: profile?.altura,
-        imc: plan?.perfil.imc,
-        objetivo: plan?.perfil.objetivo
+        edad: profile?.edad,
+        genero: profile?.genero,
+        objetivo: plan?.perfil.objetivo || profile?.objetivo
       },
-      // Limitamos el historial a los últimos 10 mensajes para evitar saturar el límite de Groq
-      historial: this._historial().slice(-10).map(m => ({ 
+      history: this._historial().slice(-10).map(m => ({ 
         role: m.rol === 'usuario' ? 'user' : 'assistant', 
         content: m.texto 
-      })),
-      contexto_plan: contextoConGuia
+      }))
     };
 
-    console.log('🚀 [Agente Chat] Enviando mensaje a n8n:', body);
+    console.log('🚀 [FitAgent Back] Chat request:', body);
 
-    return this.http.post<{ output: string }>(
+    return this.http.post<{ response: string }>(
       environment.chatWebhookUrl,
       body,
       { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }
     ).pipe(
       tap(res => {
-        console.log('✅ [Agente Chat] Respuesta recibida:', res);
-        this.agregarMensaje('agente', res.output);
+        console.log('✅ [FitAgent Back] Chat response:', res);
+        this.agregarMensaje('agente', res.response);
       }),
-      map(res => res.output)
+      map(res => res.response)
     );
   }
 
