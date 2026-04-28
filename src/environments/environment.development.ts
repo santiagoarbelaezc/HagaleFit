@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api/fit-agent',
-  planWebhookUrl: 'http://localhost:3000/api/fit-agent/generate-plan',
-  chatWebhookUrl: 'http://localhost:3000/api/fit-agent/chat'
+  apiUrl: 'https://d21q5pjq1w5lra.cloudfront.net/api/fit-agent',
+  planWebhookUrl: 'https://d21q5pjq1w5lra.cloudfront.net/api/fit-agent/generate-plan',
+  chatWebhookUrl: 'https://d21q5pjq1w5lra.cloudfront.net/api/fit-agent/chat'
 };
