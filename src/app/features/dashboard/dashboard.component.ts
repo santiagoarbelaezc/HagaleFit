@@ -53,16 +53,6 @@ import { FitAgentService } from '../../services/fit-agent.service';
       <!-- Grid de Métricas y Recomendaciones -->
       <div class="grid grid-cols-2 gap-5">
         
-        <!-- Mensaje de la IA -->
-        <div class="col-span-2 bg-white border border-border rounded-[2rem] p-6 shadow-sm animate-fade-up stagger-0" *ngIf="fitPlan()?.mensaje_motivacional">
-          <div class="flex items-center space-x-3 mb-3">
-            <span class="text-xl">🤖</span>
-            <span class="text-[10px] font-bold text-ink-muted uppercase tracking-widest">FitAgent Coach</span>
-          </div>
-          <p class="text-sm font-medium text-ink-secondary leading-relaxed italic">
-            "{{ fitPlan()?.mensaje_motivacional }}"
-          </p>
-        </div>
 
         <!-- Métricas Físicas (Sin Nivel) -->
         <div class="bg-white border border-border rounded-[2rem] p-5 shadow-sm animate-fade-up stagger-1">
@@ -77,21 +67,6 @@ import { FitAgentService } from '../../services/fit-agent.service';
           <p class="text-sm font-bold text-ink capitalize">{{ profile()?.objetivo?.replace('_', ' ') || '--' }}</p>
         </div>
 
-        <!-- Recomendaciones Estratégicas -->
-        <div class="col-span-2 bg-primary text-white rounded-[2rem] p-6 shadow-button animate-fade-up stagger-3" *ngIf="fitPlan()?.recomendaciones?.length">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-[10px] font-bold opacity-70 uppercase tracking-[0.2em]">Recomendaciones</span>
-            <span class="text-xl">✨</span>
-          </div>
-          <ul class="space-y-4">
-            @for (rec of fitPlan()?.recomendaciones ?? []; track rec) {
-              <li class="flex items-start space-x-3">
-                <div class="mt-1 w-1.5 h-1.5 bg-white rounded-full shrink-0"></div>
-                <p class="text-xs font-medium leading-relaxed opacity-90">{{ rec }}</p>
-              </li>
-            }
-          </ul>
-        </div>
 
         <!-- Alertas/Advertencias (Solo si existen) -->
         <div class="col-span-2 bg-warning-light border border-warning/20 rounded-[2rem] p-5 animate-fade-up" *ngIf="fitPlan()?.advertencias?.length">
